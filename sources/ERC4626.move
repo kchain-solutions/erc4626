@@ -4,8 +4,10 @@ module ERC4626::vault{
     use aptos_framework::coin::{Self, MintCapability, FreezeCapability, BurnCapability};
     use aptos_framework::string::{utf8};
     use aptos_framework::managed_coin;
+    use aptos_framework::event::{EventHandle};
     use std::error;
-    use std::debug;
+    //use std::debug;
+    use std::string::{String};
     use aptos_std::type_info;
 
     const VAULT_NOT_REGISTERED: u64 = 1;
@@ -25,6 +27,32 @@ module ERC4626::vault{
         burn_cap: BurnCapability<YCoinType>
     }
 
+    struct VaultEvents has key{
+        deposit_event: EventHandle<DepositEvent>,
+        withdraw_event: EventHandle<WithdrawEvent>
+    }
+
+    struct DepositEvent has drop, store{
+        from: address,
+        coin_type: String,
+        from_coin_type_amount: u64,
+        to_coin_type_amount: u64,
+        y_coin_type: String,
+        from_y_type_amount: u64,
+        to_y_coin_type_amount:u64
+    }
+
+    struct WithdrawEvent has drop, store{
+        from: address,
+        coin_type: String,
+        from_coin_type_amount: u64,
+        to_coin_type_amount: u64,
+        y_coin_type: String,
+        from_y_type_amount: u64,
+        to_y_coin_type_amount:u64
+    }
+
+
     public entry fun initialize_new_vault<CoinType, YCoinType>(contract_owner:&signer, y_coin_name:vector<u8>, y_coin_symbol:vector<u8>){
         
         let contract_owner_addr = signer::address_of(contract_owner);
@@ -36,21 +64,9 @@ module ERC4626::vault{
         let (vault_signer, vault_signer_capability) = account::create_resource_account(contract_owner, y_coin_name);
         let vault_addr = signer::address_of(&vault_signer);
         managed_coin::register<CoinType>(&vault_signer);
-
-        //assert!(exists<YCoinType>(contract_owner_addr), COIN_TWO_NOT_REGISTERED);
-        
-        //Create YCoin
-        let ad = coin_address<YCoinType>();
-        debug::print(&ad);
-        debug::print(&contract_owner_addr);
-
-        //move_to(contract_owner, ManagedCoin{});
-        
+    
         let ( burn_cap, freeze_cap, mint_cap) = coin::initialize<YCoinType>(contract_owner, utf8(y_coin_name), utf8(y_coin_symbol), 0, true);
 
-        debug::print(&b"3");
-
-        //Move
         move_to(contract_owner, VaultInfo<CoinType, YCoinType>{
             signer_capability: vault_signer_capability,
             addr: vault_addr,
@@ -58,10 +74,12 @@ module ERC4626::vault{
             freeze_cap,
             burn_cap,
         });
+    }
 
-        debug::print(&b"4");
-
-
+    fun register<CoinType>(account: &signer){
+        if (!coin::is_account_registered<CoinType>(signer::address_of(account))){
+            coin::register<CoinType>(account);
+        };
     }
 
     fun coin_address<CoinType>(): address {
@@ -73,6 +91,7 @@ module ERC4626::vault{
         let user_addr = signer::address_of(user);
         let vault_info = borrow_global<VaultInfo<CoinType, YCoinType>>(MODULE_ADDRESS);
         assert!(!exists<VaultInfo<CoinType, YCoinType>>(MODULE_ADDRESS), error::not_found(VAULT_NOT_REGISTERED));
+        initialize_vault_events<CoinType, YCoinType>(user);
         register<CoinType>(user);
         register<YCoinType>(user);
         assert!(coin::balance<CoinType>(user_addr) >= amount,error::out_of_range(INSUFFICIENT_AMOUNT));
@@ -80,6 +99,17 @@ module ERC4626::vault{
         let coins_minted = coin::mint<YCoinType>(amount, &vault_info.mint_cap);
         coin::deposit(user_addr, coins_minted);
     }
+
+    fun initialize_vault_events<CoinType, YCoinType>(account: &signer) {
+        if(!exists<VaultEvents>(signer::address_of(account))){
+            move_to(account, VaultEvents{
+                deposit_event: account::new_event_handle<DepositEvent>(account),
+                withdraw_event: account::new_event_handle<WithdrawEvent>(account)
+            });
+        }; 
+    }
+
+    fun get_vault_name(){}
 
     public entry fun withdraw(){
 
@@ -91,11 +121,5 @@ module ERC4626::vault{
 
     public entry fun total_asset(){
 
-    }
-
-    fun register<CoinType>(account: &signer){
-        if (!coin::is_account_registered<CoinType>(signer::address_of(account))){
-            coin::register<CoinType>(account);
-        };
     }
 }
