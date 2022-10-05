@@ -5,6 +5,7 @@ module ERC4626::vault{
     use aptos_framework::string::{Self, String, utf8};
     use aptos_framework::managed_coin;
     use aptos_framework::event::{Self, EventHandle};
+    use aptos_framework::timestamp;
     //use std::debug;
     use aptos_std::type_info;
 
@@ -13,7 +14,8 @@ module ERC4626::vault{
     const COIN_ONE_NOT_REGISTERED: u64 = 3;
     const COIN_TWO_NOT_EXIST:u64 = 4;
     const VAULT_ALREADY_REGISTERED: u64 = 5;
-    const INSUFFICIENT_AMOUNT: u64 = 6;
+    const INSUFFICIENT_USER_BALANCE: u64 = 6;
+    const INSUFFICIENT_VAULT_BALANCE: u64 = 7;
 
     const MODULE_ADDRESS: address = @ERC4626;
 
@@ -27,11 +29,13 @@ module ERC4626::vault{
 
     struct VaultEvents has key{
         deposit_event: EventHandle<DepositEvent>,
-        withdraw_event: EventHandle<WithdrawEvent>
+        withdraw_event: EventHandle<WithdrawlEvent>
     }
 
     struct DepositEvent has drop, store{
         from: address,
+        to: address,
+        timestamp: u64,
         vault_name: String,
         from_coin_balance: u64,
         to_coin_balance: u64,
@@ -39,8 +43,10 @@ module ERC4626::vault{
         to_coin_y_balance:u64
     }
 
-    struct WithdrawEvent has drop, store{
+    struct WithdrawlEvent has drop, store{
         from: address,
+        to: address,
+        timestamp: u64,
         vault_name: String,
         from_coin_balance: u64,
         to_coin_balance: u64,
@@ -48,20 +54,16 @@ module ERC4626::vault{
         to_coin_y_balance:u64
     }
 
-    public entry fun initialize_new_vault<CoinType, YCoinType>(contract_owner:&signer, y_coin_name:vector<u8>, y_coin_symbol:vector<u8>){
-        
+    public entry fun initialize_new_vault<CoinType, YCoinType>(contract_owner:&signer, y_coin_name:vector<u8>, y_coin_symbol:vector<u8>){      
         let contract_owner_addr = signer::address_of(contract_owner);
-
         assert!(contract_owner_addr == MODULE_ADDRESS, NO_ADMIN_PERMISSION);
         assert!(coin::is_account_registered<CoinType>(contract_owner_addr), COIN_ONE_NOT_REGISTERED);
-        assert!(!exists<VaultInfo<CoinType, YCoinType>>(contract_owner_addr), VAULT_ALREADY_REGISTERED);
-
-        let (vault_signer, vault_signer_capability) = account::create_resource_account(contract_owner, y_coin_name);
+        assert!(!exists<VaultInfo<CoinType, YCoinType>>(contract_owner_addr), VAULT_ALREADY_REGISTERED);  
+        let vault_name = get_vault_name<CoinType, YCoinType>();
+        let (vault_signer, vault_signer_capability) = account::create_resource_account(contract_owner, *string::bytes(&vault_name));
         let vault_addr = signer::address_of(&vault_signer);
         managed_coin::register<CoinType>(&vault_signer);
-    
         let ( burn_cap, freeze_cap, mint_cap) = coin::initialize<YCoinType>(contract_owner, utf8(y_coin_name), utf8(y_coin_symbol), 0, true);
-
         move_to(contract_owner, VaultInfo<CoinType, YCoinType>{
             signer_capability: vault_signer_capability,
             addr: vault_addr,
@@ -77,7 +79,6 @@ module ERC4626::vault{
         };
     }
 
-
     public entry fun deposit<CoinType, YCoinType>(user: &signer, amount:u64) acquires VaultInfo, VaultEvents{
         let user_addr = signer::address_of(user);    
         assert!(exists<VaultInfo<CoinType, YCoinType>>(MODULE_ADDRESS), VAULT_NOT_REGISTERED);
@@ -87,13 +88,15 @@ module ERC4626::vault{
         register<CoinType>(user);
         register<YCoinType>(user);
         let (from_coin_balance, from_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
-        assert!(from_coin_balance >= amount, INSUFFICIENT_AMOUNT);
+        assert!(from_coin_balance >= amount, INSUFFICIENT_USER_BALANCE);
         coin::transfer<CoinType>(user, vault_info.addr, amount);
         let coins_minted = coin::mint<YCoinType>(amount, &vault_info.mint_cap);
         coin::deposit(user_addr, coins_minted);
         let (to_coin_balance, to_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
         event::emit_event(&mut borrow_global_mut<VaultEvents>(user_addr).deposit_event, DepositEvent{
             from: user_addr,
+            to: vault_info.addr,
+            timestamp: timestamp::now_seconds(),
             vault_name,
             from_coin_balance,
             to_coin_balance,
@@ -106,7 +109,7 @@ module ERC4626::vault{
         if(!exists<VaultEvents>(signer::address_of(account))){
             move_to(account, VaultEvents{
                 deposit_event: account::new_event_handle<DepositEvent>(account),
-                withdraw_event: account::new_event_handle<WithdrawEvent>(account)
+                withdraw_event: account::new_event_handle<WithdrawlEvent>(account)
             });
         }; 
     }
@@ -132,15 +135,40 @@ module ERC4626::vault{
         (coin_balance, coin_y_balance)
     }
 
-    public entry fun withdraw(){
-
+    public entry fun withdraw<CoinType, YCoinType>(user: &signer, amount: u64) acquires VaultInfo, VaultEvents{
+        let user_addr = signer::address_of(user);    
+        assert!(exists<VaultInfo<CoinType, YCoinType>>(MODULE_ADDRESS), VAULT_NOT_REGISTERED);
+        let vault_name = get_vault_name<CoinType, YCoinType>();
+        let vault_info = borrow_global<VaultInfo<CoinType, YCoinType>>(MODULE_ADDRESS);
+        let vault_balance = coin::balance<CoinType>(vault_info.addr);
+        initialize_vault_events<CoinType, YCoinType>(user);
+        register<CoinType>(user);
+        register<YCoinType>(user);
+        let (from_coin_balance, from_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
+        assert!(from_coin_y_balance >= amount, INSUFFICIENT_USER_BALANCE);
+        assert!(vault_balance >= amount, INSUFFICIENT_VAULT_BALANCE);
+        coin::burn_from<YCoinType>(user_addr, amount, &vault_info.burn_cap);
+        let vault_signer = account::create_signer_with_capability(&vault_info.signer_capability);
+        coin::transfer<CoinType>(&vault_signer, user_addr, amount);
+        let (to_coin_balance, to_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
+        event::emit_event(&mut borrow_global_mut<VaultEvents>(user_addr).withdraw_event, WithdrawlEvent{
+            from: vault_info.addr,
+            to: user_addr,
+            timestamp: timestamp::now_seconds(),
+            vault_name,
+            from_coin_balance,
+            to_coin_balance,
+            from_coin_y_balance,
+            to_coin_y_balance
+        });
     }
 
     public entry fun redeem(){
 
     }
 
-    public entry fun total_asset(){
-
+    public entry fun total_asset_supply<CoinType, YCoinType>() acquires VaultInfo{
+        assert!(exists<VaultInfo<CoinType, YCoinType>>(MODULE_ADDRESS), VAULT_NOT_REGISTERED);
+        let _vault_info = borrow_global<VaultInfo<CoinType, YCoinType>>(MODULE_ADDRESS);
     }
 }
