@@ -14,6 +14,7 @@ module ERC4626::VaultTest{
     const YAPTOSCOIN_NOT_CREATED: u64 = 1;
 
     const CONTRACT_OWNER: address = @ERC4626;
+    const APTOSCOIN_MINT_AMOUNT: u64 = 1000000000; 
 
     struct YAptosCoin has key {}
     struct ZAptosCoin has key {}
@@ -41,8 +42,8 @@ module ERC4626::VaultTest{
         let user_addr = signer::address_of(user);
 
         let ( burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
-        let coins_minted_admin = coin::mint<AptosCoin>(1000000000, &mint_cap);
-        let coins_minted_user = coin::mint<AptosCoin>(1000000000, &mint_cap);
+        let coins_minted_admin = coin::mint<AptosCoin>(APTOSCOIN_MINT_AMOUNT, &mint_cap);
+        let coins_minted_user = coin::mint<AptosCoin>(APTOSCOIN_MINT_AMOUNT, &mint_cap);
 
         if (!coin::is_account_registered<AptosCoin>(admin_addr)){
 	      managed_coin::register<AptosCoin>(contract_owner);
@@ -59,6 +60,67 @@ module ERC4626::VaultTest{
             burn_cap
         });
     }
+
+    #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
+    #[expected_failure(abort_code = 5)]
+    public fun initialiaze_test_vault_already_exist(contract_owner: &signer, user: &signer, aptos_framework:&signer){
+        initialiaze_test(contract_owner, user, aptos_framework);
+        let (y_coin_name, y_coin_symbol): (vector<u8>, vector<u8>) = (b"yAptos", b"yAPT");
+        vault::initialize_new_vault<AptosCoin, YAptosCoin>(contract_owner, y_coin_name, y_coin_symbol);
+    }
+
+    #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
+    #[expected_failure(abort_code = 2)]
+    public fun initialiaze_test_no_permission(contract_owner: &signer, user: &signer, aptos_framework:&signer){
+        let (y_coin_name, y_coin_symbol): (vector<u8>, vector<u8>) = (b"yAptos", b"yAPT");
+
+        account::create_account_for_test(signer::address_of(contract_owner));
+        account::create_account_for_test(signer::address_of(user));
+        mint_aptos(contract_owner, user, aptos_framework);
+        vault::initialize_new_vault<AptosCoin, YAptosCoin>(user, y_coin_name, y_coin_symbol);
+    }
+
+    #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
+    public fun deposit_test(contract_owner: &signer, user: &signer, aptos_framework:&signer){
+        let deposit_amount: u64 = 100000;
+        let before_aptoscoin_bal: u64 = APTOSCOIN_MINT_AMOUNT;
+        let before_yaptoscoin_bal: u64 = 0;
+        let user_addr = signer::address_of(user);
+        initialiaze_test(contract_owner, user, aptos_framework);
+        vault::deposit<AptosCoin, YAptosCoin>(user, deposit_amount);
+        let (after_aptoscoin_bal, after_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        assert!(before_aptoscoin_bal - after_aptoscoin_bal == deposit_amount, 0);
+        assert!(after_yaptoscoin_bal - before_yaptoscoin_bal == deposit_amount, 1);
+    }
+
+    #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
+    #[expected_failure(abort_code = 6)]
+    public fun deposit_test_invalid_amount(contract_owner: &signer, user: &signer, aptos_framework:&signer){
+        let deposit_amount: u64 = APTOSCOIN_MINT_AMOUNT + 1000;
+        let before_aptoscoin_bal: u64 = APTOSCOIN_MINT_AMOUNT;
+        let before_yaptoscoin_bal: u64 = 0;
+        let user_addr = signer::address_of(user);
+        initialiaze_test(contract_owner, user, aptos_framework);
+        vault::deposit<AptosCoin, YAptosCoin>(user, deposit_amount);
+        let (after_aptoscoin_bal, after_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        assert!(before_aptoscoin_bal - after_aptoscoin_bal == deposit_amount, 0);
+        assert!(after_yaptoscoin_bal - before_yaptoscoin_bal == deposit_amount, 1);
+    }
+
+    #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
+    #[expected_failure(abort_code = 1)]
+    public fun deposit_test_invalid_vault(contract_owner: &signer, user: &signer, aptos_framework:&signer){
+        let deposit_amount: u64 = APTOSCOIN_MINT_AMOUNT + 1000;
+        let before_aptoscoin_bal: u64 = APTOSCOIN_MINT_AMOUNT;
+        let before_yaptoscoin_bal: u64 = 0;
+        let user_addr = signer::address_of(user);
+        initialiaze_test(contract_owner, user, aptos_framework);
+        vault::deposit<ZAptosCoin, YAptosCoin>(user, deposit_amount);
+        let (after_aptoscoin_bal, after_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        assert!(before_aptoscoin_bal - after_aptoscoin_bal == deposit_amount, 0);
+        assert!(after_yaptoscoin_bal - before_yaptoscoin_bal == deposit_amount, 1);
+    }
+
 
     
 
