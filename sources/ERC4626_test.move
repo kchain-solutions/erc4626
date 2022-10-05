@@ -142,12 +142,12 @@ module ERC4626::VaultTest{
         assert!(after_aptoscoin_bal - before_aptoscoin_bal  == withdrawal_amount, 0);
         assert!(before_yaptoscoin_bal - after_yaptoscoin_bal  == withdrawal_amount, 1);
     }
-use std::debug;
+
     #[test(contract_owner=@ERC4626, user=@0x234, user2=@345, aptos_framework=@aptos_framework)]
     public fun withdraw_after_trasfer_test(contract_owner: &signer, user: &signer, user2:&signer, aptos_framework: &signer){
         let deposit_amount: u64 = 100000;
-        let transfer_amount: u64 = 75000;
-        let withdrawal_amount: u64 = 175000;
+        let transfer_amount: u64 = 50000;
+        let withdrawal_amount: u64 = 125000;
         let user_addr = signer::address_of(user);
         let user2_addr = signer::address_of(user2);
         account::create_account_for_test(signer::address_of(user2));
@@ -155,14 +155,13 @@ use std::debug;
         coin::register<AptosCoin>(user2);
         coin::transfer<AptosCoin>(user, user2_addr, deposit_amount);
         vault::deposit<AptosCoin, YAptosCoin>(user, deposit_amount);
+        vault::deposit<AptosCoin, YAptosCoin>(user2, deposit_amount);
         vault::transfer<AptosCoin, YAptosCoin>(contract_owner, transfer_amount);
-        let (before_aptoscoin_bal, before_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        let (before_aptoscoin_bal, _before_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
         vault::withdraw<AptosCoin, YAptosCoin>(user, withdrawal_amount);
         let (after_aptoscoin_bal, after_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
-        assert!(after_aptoscoin_bal - before_aptoscoin_bal  == withdrawal_amount, 0);
-        debug::print<u64>(&before_yaptoscoin_bal);
-        debug::print<u64>(&after_yaptoscoin_bal);
-        //assert!(before_yaptoscoin_bal - after_yaptoscoin_bal == 0, 0);
+        assert!(after_aptoscoin_bal - before_aptoscoin_bal  == withdrawal_amount, 0);  
+        assert!(after_yaptoscoin_bal == 0, 0);
     }    
 
     #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
