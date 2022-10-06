@@ -193,4 +193,40 @@ module ERC4626::VaultTest{
         assert!(after_aptoscoin_bal - before_aptoscoin_bal  == withdrawal_amount, 0);
         assert!(before_yaptoscoin_bal - after_yaptoscoin_bal  == withdrawal_amount, 1);
     }
+
+    #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
+    public fun redeem_test_with_admin_transfer(contract_owner: &signer, user: &signer, aptos_framework: &signer){
+        let deposit_amount: u64 = 100000;
+        let transfer_amount: u64 = 200000;
+        let redeem_amount: u64 = 50000;
+        let user_addr = signer::address_of(user);
+        initialiaze_test(contract_owner, user, aptos_framework);
+        vault::deposit<AptosCoin, YAptosCoin>(user, deposit_amount);
+        vault::transfer<AptosCoin, YAptosCoin>(contract_owner, transfer_amount);
+        let (before_aptoscoin_bal, before_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        assert!(before_yaptoscoin_bal == deposit_amount, 0);
+        vault::redeem<AptosCoin, YAptosCoin>(user, redeem_amount);
+        let (after_aptoscoin_bal, after_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        assert!(after_aptoscoin_bal - before_aptoscoin_bal  == (deposit_amount + transfer_amount) / 2, 1);
+        assert!(after_yaptoscoin_bal  == (deposit_amount - redeem_amount), 2);
+    }
+
+    #[test(contract_owner=@ERC4626, user=@0x234, aptos_framework=@aptos_framework)]
+    #[expected_failure (abort_code=8)]
+    public fun redeem_test_insufficient_amount(contract_owner: &signer, user: &signer, aptos_framework: &signer){
+        let deposit_amount: u64 = 100000;
+        let transfer_amount: u64 = 200000;
+        let redeem_amount: u64 = deposit_amount + 1;
+        let user_addr = signer::address_of(user);
+        initialiaze_test(contract_owner, user, aptos_framework);
+        vault::deposit<AptosCoin, YAptosCoin>(user, deposit_amount);
+        vault::transfer<AptosCoin, YAptosCoin>(contract_owner, transfer_amount);
+        let (before_aptoscoin_bal, before_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        assert!(before_yaptoscoin_bal == deposit_amount, 0);
+        vault::redeem<AptosCoin, YAptosCoin>(user, redeem_amount);
+        let (after_aptoscoin_bal, after_yaptoscoin_bal) = vault::get_coins_balance<AptosCoin, YAptosCoin>(user_addr);
+        assert!(after_aptoscoin_bal - before_aptoscoin_bal  == (deposit_amount + transfer_amount) / 2, 1);
+        assert!(after_yaptoscoin_bal  == (deposit_amount - redeem_amount), 2);
+    }
+
 }
