@@ -22,6 +22,7 @@ module ERC4626::vault{
     struct VaultInfo<phantom CoinType, phantom YCoinType> has key{
         signer_capability: account::SignerCapability,
         addr: address,
+        fees: u64,
         mint_cap: MintCapability<YCoinType>,
         freeze_cap: FreezeCapability<YCoinType>,
         burn_cap: BurnCapability<YCoinType>
@@ -33,7 +34,7 @@ module ERC4626::vault{
 
     struct VaultEvents has key{
         deposit_event: EventHandle<DepositEvent>,
-        withdraw_event: EventHandle<WithdrawalEvent>,
+        withdrawal_event: EventHandle<WithdrawalEvent>,
         transfer_event: EventHandle<TransferEvent>
     }
 
@@ -70,7 +71,7 @@ module ERC4626::vault{
         to_coin_y_balance:u64
     }
 
-    public entry fun initialize_new_vault<CoinType, YCoinType>(contract_owner:&signer, y_coin_name:vector<u8>, y_coin_symbol:vector<u8>){      
+    public entry fun initialize_new_vault<CoinType, YCoinType>(contract_owner:&signer, y_coin_name:vector<u8>, y_coin_symbol:vector<u8>, fees: u64){      
         let contract_owner_addr = signer::address_of(contract_owner);
         assert!(contract_owner_addr == MODULE_ADDRESS, NO_ADMIN_PERMISSION);
         assert!(coin::is_account_registered<CoinType>(contract_owner_addr), COIN_ONE_NOT_REGISTERED);
@@ -83,6 +84,7 @@ module ERC4626::vault{
         move_to(contract_owner, VaultInfo<CoinType, YCoinType>{
             signer_capability: vault_signer_capability,
             addr: vault_addr,
+            fees,
             mint_cap,
             freeze_cap,
             burn_cap,
@@ -107,7 +109,8 @@ module ERC4626::vault{
         register<CoinType>(user);
         register<YCoinType>(user);
         let (from_coin_balance, from_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
-        assert!(from_coin_balance >= asset_amount, INSUFFICIENT_USER_BALANCE);
+        assert!(from_coin_balance >= asset_amount + vault_info.fees, INSUFFICIENT_USER_BALANCE);
+        coin::transfer<CoinType>(user, MODULE_ADDRESS, vault_info.fees);
         coin::transfer<CoinType>(user, vault_info.addr, asset_amount);
         let coins_minted = coin::mint<YCoinType>(asset_amount, &vault_info.mint_cap);
         coin::deposit(user_addr, coins_minted);
@@ -130,7 +133,7 @@ module ERC4626::vault{
         if(!exists<VaultEvents>(signer::address_of(account))){
             move_to(account, VaultEvents{
                 deposit_event: account::new_event_handle<DepositEvent>(account),
-                withdraw_event: account::new_event_handle<WithdrawalEvent>(account),
+                withdrawal_event: account::new_event_handle<WithdrawalEvent>(account),
                 transfer_event: account::new_event_handle<TransferEvent>(account)
             });
         }; 
@@ -169,12 +172,14 @@ module ERC4626::vault{
         let (from_coin_balance, from_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
         let coin_y_to_burn = convert_asset_to_shares<CoinType>(vault_info.addr, assets_amount, vault_shares_supply.value);
         assert!(from_coin_y_balance >= coin_y_to_burn, INSUFFICIENT_USER_BALANCE);
+        assert!(from_coin_balance >= vault_info.fees, INSUFFICIENT_USER_BALANCE);
+        coin::transfer<CoinType>(user, MODULE_ADDRESS, vault_info.fees);
         coin::burn_from<YCoinType>(user_addr, coin_y_to_burn, &vault_info.burn_cap);
         vault_shares_supply.value = vault_shares_supply.value - coin_y_to_burn;
         let vault_signer = account::create_signer_with_capability(&vault_info.signer_capability);
         coin::transfer<CoinType>(&vault_signer, user_addr, assets_amount);
         let (to_coin_balance, to_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
-        event::emit_event(&mut borrow_global_mut<VaultEvents>(user_addr).withdraw_event, WithdrawalEvent{
+        event::emit_event(&mut borrow_global_mut<VaultEvents>(user_addr).withdrawal_event, WithdrawalEvent{
             from: vault_info.addr,
             to: user_addr,
             timestamp: timestamp::now_seconds(),
@@ -209,10 +214,12 @@ module ERC4626::vault{
         let withdrawal_amount = convert_shares_to_asset<CoinType>(vault_info.addr, shares_amount, shares_supply);
         let (from_coin_balance, from_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
         coin::burn_from<YCoinType>(user_addr, shares_amount, &vault_info.burn_cap);
+        assert!(from_coin_balance >= vault_info.fees, INSUFFICIENT_USER_BALANCE);
+        coin::transfer<CoinType>(user, MODULE_ADDRESS, vault_info.fees);
         coin::transfer<CoinType>(&vault_signer, user_addr, withdrawal_amount);
         vault_shares_supply.value = vault_shares_supply.value - shares_amount;
         let (to_coin_balance, to_coin_y_balance): (u64, u64) = get_coins_balance<CoinType, YCoinType>(user_addr);
-        event::emit_event(&mut borrow_global_mut<VaultEvents>(user_addr).withdraw_event, WithdrawalEvent{
+        event::emit_event(&mut borrow_global_mut<VaultEvents>(user_addr).withdrawal_event, WithdrawalEvent{
             from: vault_info.addr,
             to: user_addr,
             timestamp: timestamp::now_seconds(),

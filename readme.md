@@ -81,7 +81,11 @@ This method allow to transfer on the vault asset without receive shares back.
 }
 ```
 #### Init aptos_vault
-```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::initialiaze_vault --args string:yAptos string:yAPT``` 
+```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::initialiaze_vault --args string:yAptos string:yAPT u64:5000``` 
+
+Transaction example
+```json
+```
 
 #### Deposit
 ```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::deposit --args u64:10000```

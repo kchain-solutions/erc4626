@@ -1,12 +1,12 @@
 module ERC4626::aptos_vault{
 
-    use ERC4626::vault;
     use aptos_framework::aptos_coin::{AptosCoin};
+    use ERC4626::vault;
 
     struct YAptosCoin has key {}
 
-    public entry fun initialiaze_vault(contract_owner: &signer, coin_name: vector<u8>, coin_symbol: vector<u8>){
-        vault::initialize_new_vault<AptosCoin, YAptosCoin>(contract_owner, coin_name, coin_symbol);
+    public entry fun initialiaze_vault(contract_owner: &signer, coin_name: vector<u8>, coin_symbol: vector<u8>, fees: u64){
+        vault::initialize_new_vault<AptosCoin, YAptosCoin>(contract_owner, coin_name, coin_symbol, fees);
     }
 
     public entry fun deposit(user: &signer, amount: u64){
