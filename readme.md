@@ -56,8 +56,7 @@ The method allows the user to deposit asset and receive back shares 1:1 of the a
 This function accept as input the asset amount the user wants to withdraw. If the user has sufficient shares to withdraw the asset amount the method will succeed.
 
 ### Redeem
-```
-```
+```public entry fun redeem<CoinType, YCoinType>(user: &signer, shares_amount: u64) acquires VaultInfo, VaultEvents, VaultSharesSupply```
 This function accept as input a share amount value. The user will receive asset coin proportional to his share partecipation.
 
 ### Transfer
@@ -68,96 +67,110 @@ This method allow to transfer on the vault asset without receive shares back.
 ```json
 {
   "Result": {
-    "transaction_hash": "0xf91d53ce91e1e7bcfc3cb961db407a028da54447acaa5599034967ab1b4ed9b5",
-    "gas_used": 2909,
+    "transaction_hash": "0xc9e5c4da4f79eb9fbbc531190dc1c8f3fcf87ae846112d156462aa8ce8064346",
+    "gas_used": 2951,
     "gas_unit_price": 100,
-    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
     "sequence_number": 0,
     "success": true,
-    "timestamp_us": 1665088147757279,
-    "version": 9428460,
+    "timestamp_us": 1665131997338327,
+    "version": 10368377,
     "vm_status": "Executed successfully"
   }
 }
+}
 ```
 #### Init aptos_vault
-```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::initialiaze_vault --args string:yAptos string:yAPT u64:5000``` 
-
-Transaction example
-```json
-```
-
-#### Deposit
-```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::deposit --args u64:10000```
+```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::initialiaze_vault --args string:yAptos string:yAPT u64:5000``` 
 
 Transaction example
 ```json
 {
   "Result": {
-    "transaction_hash": "0xc844df7eba641adc89d331b0690e7439f2040df40f1b6658aaa39cf7cfa71c11",
-    "gas_used": 576,
+    "transaction_hash": "0x4ea0d9b0e6eb952620f7ece09cd631866ed60893650e4405a3624b16304982ca",
+    "gas_used": 460,
     "gas_unit_price": 100,
-    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
+    "sequence_number": 1,
+    "success": true,
+    "timestamp_us": 1665132163972206,
+    "version": 10374348,
+    "vm_status": "Executed successfully"
+  }
+}
+```
+
+#### Deposit
+```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::deposit --args u64:10000```
+
+Transaction example
+```json
+{
+  "Result": {
+    "transaction_hash": "0xc69c6a3b150205ac9ba2efc170edb617d1cd65ef94bc69b45b93a45cfac1d3ca",
+    "gas_used": 581,
+    "gas_unit_price": 100,
+    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
     "sequence_number": 2,
     "success": true,
-    "timestamp_us": 1665128310974239,
-    "version": 10229208,
+    "timestamp_us": 1665132216831974,
+    "version": 10376256,
     "vm_status": "Executed successfully"
   }
 }
 ```
 #### Withdraw
-```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::withdraw --args u64:500```
-
+```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::withdraw --args u64:500```
+Transaction example
 ```json
 {
   "Result": {
-    "transaction_hash": "0xea4741444e11f94c87a02be161d6f599c30b8bb0a871466269251a746976346e",
-    "gas_used": 514,
+    "transaction_hash": "0xf1ebc42b346326c55541785ee8c95f1ad27d2a15543698469bf9bd7902206572",
+    "gas_used": 519,
     "gas_unit_price": 100,
-    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
     "sequence_number": 3,
     "success": true,
-    "timestamp_us": 1665128643523434,
-    "version": 10240753,
+    "timestamp_us": 1665132247983205,
+    "version": 10377203,
     "vm_status": "Executed successfully"
   }
 }
 ```
 
 #### Transfer 
-```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::transfer --args u64:17899```
-
+```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::transfer --args u64:17899```
+Transaction example
 ```json
 {
   "Result": {
-    "transaction_hash": "0x33783bba016efc7661b1222d1992586aabbd6aab59ab50828bea0127247e2233",
+    "transaction_hash": "0xf7a9c3da644f03fe5b1f9f839ee42e47b3853069b93c2333bb0061ce8de13697",
     "gas_used": 358,
     "gas_unit_price": 100,
-    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
     "sequence_number": 4,
     "success": true,
-    "timestamp_us": 1665128685821998,
-    "version": 10242087,
+    "timestamp_us": 1665132300480670,
+    "version": 10378732,
     "vm_status": "Executed successfully"
   }
 }
 ```
 
 #### Redeem
-```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::redeem --args u64:799```
-
+```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::redeem --args u64:799```
+Transaction example
 ```json
 {
   "Result": {
-    "transaction_hash": "0xaf5e1738b8fe9c9a23367e0dc84a4afcca1d7149ee2c54b6163383a0d484887f",
-    "gas_used": 513,
+    "transaction_hash": "0xd1f89c6e689c04ae1242a4645d4af981dc0a70cd4cc0505bc4b4a07f439ffc7a",
+    "gas_used": 518,
     "gas_unit_price": 100,
-    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
     "sequence_number": 5,
     "success": true,
-    "timestamp_us": 1665128729962474,
-    "version": 10243493,
+    "timestamp_us": 1665132334705489,
+    "version": 10379725,
     "vm_status": "Executed successfully"
   }
 }

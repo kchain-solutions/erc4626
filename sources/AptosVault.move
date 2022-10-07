@@ -1,4 +1,4 @@
-module ERC4626::aptos_vault{
+module ERC4626::AptosVault{
 
     use aptos_framework::aptos_coin::{AptosCoin};
     use ERC4626::vault;
