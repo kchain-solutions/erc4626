@@ -63,3 +63,98 @@ This function accept as input a share amount value. The user will receive asset 
 ### Transfer
 ```public entry fun transfer<CoinType, YCoinType>(user: &signer, asset_amount:u64) acquires VaultEvents, VaultInfo```
 This method allow to transfer on the vault asset without receive shares back.
+
+### Cotract deployed
+```json
+{
+  "Result": {
+    "transaction_hash": "0xf91d53ce91e1e7bcfc3cb961db407a028da54447acaa5599034967ab1b4ed9b5",
+    "gas_used": 2909,
+    "gas_unit_price": 100,
+    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sequence_number": 0,
+    "success": true,
+    "timestamp_us": 1665088147757279,
+    "version": 9428460,
+    "vm_status": "Executed successfully"
+  }
+}
+```
+#### Init aptos_vault
+```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::initialiaze_vault --args string:yAptos string:yAPT``` 
+
+#### Deposit
+```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::deposit --args u64:10000```
+
+Transaction example
+```json
+{
+  "Result": {
+    "transaction_hash": "0xc844df7eba641adc89d331b0690e7439f2040df40f1b6658aaa39cf7cfa71c11",
+    "gas_used": 576,
+    "gas_unit_price": 100,
+    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sequence_number": 2,
+    "success": true,
+    "timestamp_us": 1665128310974239,
+    "version": 10229208,
+    "vm_status": "Executed successfully"
+  }
+}
+```
+#### Withdraw
+```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::withdraw --args u64:500```
+
+```json
+{
+  "Result": {
+    "transaction_hash": "0xea4741444e11f94c87a02be161d6f599c30b8bb0a871466269251a746976346e",
+    "gas_used": 514,
+    "gas_unit_price": 100,
+    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sequence_number": 3,
+    "success": true,
+    "timestamp_us": 1665128643523434,
+    "version": 10240753,
+    "vm_status": "Executed successfully"
+  }
+}
+```
+
+#### Transfer 
+```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::transfer --args u64:17899```
+
+```json
+{
+  "Result": {
+    "transaction_hash": "0x33783bba016efc7661b1222d1992586aabbd6aab59ab50828bea0127247e2233",
+    "gas_used": 358,
+    "gas_unit_price": 100,
+    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sequence_number": 4,
+    "success": true,
+    "timestamp_us": 1665128685821998,
+    "version": 10242087,
+    "vm_status": "Executed successfully"
+  }
+}
+```
+
+#### Redeem
+```aptos move run --function-id f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800::aptos_vault::redeem --args u64:799```
+
+```json
+{
+  "Result": {
+    "transaction_hash": "0xaf5e1738b8fe9c9a23367e0dc84a4afcca1d7149ee2c54b6163383a0d484887f",
+    "gas_used": 513,
+    "gas_unit_price": 100,
+    "sender": "f7af07e1e1186a1484fb7043f5a36048af49e941d515a8cf049e939d56a84800",
+    "sequence_number": 5,
+    "success": true,
+    "timestamp_us": 1665128729962474,
+    "version": 10243493,
+    "vm_status": "Executed successfully"
+  }
+}
+```
