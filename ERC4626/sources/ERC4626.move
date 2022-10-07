@@ -1,4 +1,4 @@
-module ERC4626::vault{
+module ERC4626::GenericVault{
     use aptos_framework::account;
     use aptos_framework::signer;
     use aptos_framework::coin::{Self, MintCapability, FreezeCapability, BurnCapability};

@@ -63,114 +63,156 @@ This function accept as input a share amount value. The user will receive asset 
 ```public entry fun transfer<CoinType, YCoinType>(user: &signer, asset_amount:u64) acquires VaultEvents, VaultInfo```
 This method allow to transfer on the vault asset without receive shares back.
 
-### Cotract deployed
+## OnChain Tutorial
+
+The logic of the smart contract is contained in **ERC4626.move**. ERC4626 espone dei metodi generici per la creazione di vaults.
+The concrete instance that allows interaction with the contract is achieved through **AptosVault.move**.
+
+#### Publishing ERC4626 contract
+```aptos move publish --package-dir erc4626/ERC4626 --named-addresses ERC4626=default ```
+
 ```json
 {
   "Result": {
-    "transaction_hash": "0xc9e5c4da4f79eb9fbbc531190dc1c8f3fcf87ae846112d156462aa8ce8064346",
-    "gas_used": 2951,
+    "transaction_hash": "0x547221f3331cf54b631d15ea8af6c59163535b3df5049b20c6e479020b5f2454",
+    "gas_used": 2455,
     "gas_unit_price": 100,
-    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
+    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
     "sequence_number": 0,
     "success": true,
-    "timestamp_us": 1665131997338327,
-    "version": 10368377,
+    "timestamp_us": 1665137102663405,
+    "version": 10528570,
     "vm_status": "Executed successfully"
   }
 }
-}
 ```
-#### Init aptos_vault
-```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::initialiaze_vault --args string:yAptos string:yAPT u64:5000``` 
 
-Transaction example
+#### Publishing AptosVault
+The aptos vault is the concrete instance of the ERC4626
+
+edit the AptosVaul toml file with the address of the ERC4626 just published
+
+```toml
+[package]
+name="AptosVault"
+version="0.1.0"
+
+[addresses]
+AptosVault="_"
+ERC4626="0x932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49"
+
+[dependencies]
+ERC4626= { local = "../ERC4626/" }
+```
+
+```aptos move publish --package-dir erc4626/AptosVault --named-addresses ERC4626=default --named-addresses AptosVaut=default```
+
 ```json
 {
   "Result": {
-    "transaction_hash": "0x4ea0d9b0e6eb952620f7ece09cd631866ed60893650e4405a3624b16304982ca",
-    "gas_used": 460,
+    "transaction_hash": "0x9fec2646016d4a00b4bb28817aed57f5bb9528920aaa82e3c66ce7cfba73bd35",
+    "gas_used": 1376,
     "gas_unit_price": 100,
-    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
+    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
     "sequence_number": 1,
     "success": true,
-    "timestamp_us": 1665132163972206,
-    "version": 10374348,
+    "timestamp_us": 1665137529572501,
+    "version": 10537334,
     "vm_status": "Executed successfully"
   }
 }
 ```
 
-#### Deposit
-```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::deposit --args u64:10000```
+### Create vault instance
+```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::initialiaze_vault --args string:yAptosCoin string:yAPT u64:5000```
 
-Transaction example
 ```json
 {
   "Result": {
-    "transaction_hash": "0xc69c6a3b150205ac9ba2efc170edb617d1cd65ef94bc69b45b93a45cfac1d3ca",
-    "gas_used": 581,
+    "transaction_hash": "0x6be20bbe91c4b19927635d20a3943b7ac35cbfae8fffd24112d1fa088e8bcef1",
+    "gas_used": 461,
     "gas_unit_price": 100,
-    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
+    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
     "sequence_number": 2,
     "success": true,
-    "timestamp_us": 1665132216831974,
-    "version": 10376256,
+    "timestamp_us": 1665137964471323,
+    "version": 10547898,
     "vm_status": "Executed successfully"
   }
 }
 ```
-#### Withdraw
-```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::withdraw --args u64:500```
-Transaction example
+
+### Deposit example
+```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::deposit --args string:yAptosCoin string:yAPT u64:1000000```
+
 ```json
 {
   "Result": {
-    "transaction_hash": "0xf1ebc42b346326c55541785ee8c95f1ad27d2a15543698469bf9bd7902206572",
+    "transaction_hash": "0xba5287bb947d0762c5f08322a26189bca75f3124a4e3a97f423bf91f0b2330ce",
     "gas_used": 519,
     "gas_unit_price": 100,
-    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
-    "sequence_number": 3,
-    "success": true,
-    "timestamp_us": 1665132247983205,
-    "version": 10377203,
-    "vm_status": "Executed successfully"
-  }
-}
-```
-
-#### Transfer 
-```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::transfer --args u64:17899```
-Transaction example
-```json
-{
-  "Result": {
-    "transaction_hash": "0xf7a9c3da644f03fe5b1f9f839ee42e47b3853069b93c2333bb0061ce8de13697",
-    "gas_used": 358,
-    "gas_unit_price": 100,
-    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
+    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
     "sequence_number": 4,
     "success": true,
-    "timestamp_us": 1665132300480670,
-    "version": 10378732,
+    "timestamp_us": 1665138202287008,
+    "version": 10553487,
     "vm_status": "Executed successfully"
   }
 }
 ```
 
-#### Redeem
-```aptos move run --function-id fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1::AptosVault::redeem --args u64:799```
-Transaction example
+### Trasfer example
+```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::transfer --args u64:1111```
+
 ```json
 {
   "Result": {
-    "transaction_hash": "0xd1f89c6e689c04ae1242a4645d4af981dc0a70cd4cc0505bc4b4a07f439ffc7a",
-    "gas_used": 518,
+    "transaction_hash": "0x392aae4f18a31f69ebba8849e15bbb8499ea0ce13a3e39011b573cc589820438",
+    "gas_used": 465,
     "gas_unit_price": 100,
-    "sender": "fdee3411eaf723b63f439bb7d026dd3abd3b6017007e6a2f87b0e7b1e30a7ca1",
+    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
+    "sequence_number": 3,
+    "success": true,
+    "timestamp_us": 1665138117925874,
+    "version": 10551808,
+    "vm_status": "Executed successfully"
+  }
+}
+```
+
+### Withdraw example
+```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::withdraw --args u64:20000```
+
+```json
+{
+  "Result": {
+    "transaction_hash": "0x9fbd267ed2fb9a5178ded9704a7f43a05235dd85207c84e3d2236d891f3bee1d",
+    "gas_used": 520,
+    "gas_unit_price": 100,
+    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
     "sequence_number": 5,
     "success": true,
-    "timestamp_us": 1665132334705489,
-    "version": 10379725,
+    "timestamp_us": 1665138249738149,
+    "version": 10554542,
+    "vm_status": "Executed successfully"
+  }
+}
+```
+
+### Redeem example
+```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::redeem --args u64:33300```
+
+```json
+{
+  "Result": {
+    "transaction_hash": "0xb0418112eccdd18f6d2c7ea35e4df4c643b6f7e92b27b2966c686f3cf39c0bf9",
+    "gas_used": 518,
+    "gas_unit_price": 100,
+    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
+    "sequence_number": 6,
+    "success": true,
+    "timestamp_us": 1665138301499872,
+    "version": 10555684,
     "vm_status": "Executed successfully"
   }
 }
