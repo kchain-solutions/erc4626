@@ -72,16 +72,17 @@ The concrete instance that allows interaction with the contract is achieved thro
 ```aptos move publish --package-dir erc4626/ERC4626 --named-addresses ERC4626=default ```
 
 ```json
+
 {
   "Result": {
-    "transaction_hash": "0x547221f3331cf54b631d15ea8af6c59163535b3df5049b20c6e479020b5f2454",
+    "transaction_hash": "0x28ded100a300f4798ac34bcd88065148db240fe2fcdad6fa5303c354fb4754e6",
     "gas_used": 2455,
     "gas_unit_price": 100,
-    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
+    "sender": "3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af",
     "sequence_number": 0,
     "success": true,
-    "timestamp_us": 1665137102663405,
-    "version": 10528570,
+    "timestamp_us": 1665409837712911,
+    "version": 16512389,
     "vm_status": "Executed successfully"
   }
 }
@@ -99,82 +100,82 @@ version="0.1.0"
 
 [addresses]
 AptosVault="_"
-ERC4626="0x932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49"
+ERC4626="0x3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af"
 
 [dependencies]
 ERC4626= { local = "../ERC4626/" }
 ```
 
-```aptos move publish --package-dir erc4626/AptosVault --named-addresses ERC4626=default --named-addresses AptosVaut=default```
+```aptos move publish --package-dir AptosVault --named-addresses ERC4626=default --named-addresses AptosVault=default```
 
 ```json
 {
   "Result": {
-    "transaction_hash": "0x9fec2646016d4a00b4bb28817aed57f5bb9528920aaa82e3c66ce7cfba73bd35",
-    "gas_used": 1376,
+    "transaction_hash": "0x992c939b27df9cb37d54581848944a0db9df653b4ae0d7ad265a2875a17a90f4",
+    "gas_used": 1375,
     "gas_unit_price": 100,
-    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
+    "sender": "3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af",
     "sequence_number": 1,
     "success": true,
-    "timestamp_us": 1665137529572501,
-    "version": 10537334,
+    "timestamp_us": 1665409875500956,
+    "version": 16513248,
     "vm_status": "Executed successfully"
   }
 }
 ```
 
 ### Create vault instance
-```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::initialiaze_vault --args string:yAptosCoin string:yAPT u64:5000```
+```aptos move run --function-id 3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af::ConcreteVault::initialiaze_vault --args string:aptosCoin string:apt u64:5000```
 
 ```json
 {
   "Result": {
-    "transaction_hash": "0x6be20bbe91c4b19927635d20a3943b7ac35cbfae8fffd24112d1fa088e8bcef1",
+    "transaction_hash": "0xfbb83e3432e52202dcc7ea930e111332f1562abb753e4466e51f922624b17096",
     "gas_used": 461,
     "gas_unit_price": 100,
-    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
-    "sequence_number": 2,
+    "sender": "3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af",
+    "sequence_number": 3,
     "success": true,
-    "timestamp_us": 1665137964471323,
-    "version": 10547898,
+    "timestamp_us": 1665410572352481,
+    "version": 16527440,
     "vm_status": "Executed successfully"
   }
 }
 ```
 
 ### Deposit example
-```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::deposit --args string:yAptosCoin string:yAPT u64:1000000```
+```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::deposit --args u64:1000000```
 
 ```json
 {
   "Result": {
-    "transaction_hash": "0xba5287bb947d0762c5f08322a26189bca75f3124a4e3a97f423bf91f0b2330ce",
-    "gas_used": 519,
+    "transaction_hash": "0x6458d2baa3c1818e8238c9ea6fceeb840d0f8653037cb5e838771fb0e0d71215",
+    "gas_used": 582,
     "gas_unit_price": 100,
-    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
+    "sender": "3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af",
     "sequence_number": 4,
     "success": true,
-    "timestamp_us": 1665138202287008,
-    "version": 10553487,
+    "timestamp_us": 1665410841570928,
+    "version": 16533346,
     "vm_status": "Executed successfully"
   }
 }
 ```
 
 ### Trasfer example
-```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::transfer --args u64:1111```
+```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::transfer --args u64:1111111```
 
 ```json
 {
   "Result": {
-    "transaction_hash": "0x392aae4f18a31f69ebba8849e15bbb8499ea0ce13a3e39011b573cc589820438",
-    "gas_used": 465,
+    "transaction_hash": "0x5ff9c238037e5d9615fd819c981203442d3d103c9a714a5f4bfe137a1955bd9d",
+    "gas_used": 358,
     "gas_unit_price": 100,
-    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
-    "sequence_number": 3,
+    "sender": "3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af",
+    "sequence_number": 6,
     "success": true,
-    "timestamp_us": 1665138117925874,
-    "version": 10551808,
+    "timestamp_us": 1665410904880749,
+    "version": 16534629,
     "vm_status": "Executed successfully"
   }
 }
@@ -186,14 +187,14 @@ ERC4626= { local = "../ERC4626/" }
 ```json
 {
   "Result": {
-    "transaction_hash": "0x9fbd267ed2fb9a5178ded9704a7f43a05235dd85207c84e3d2236d891f3bee1d",
-    "gas_used": 520,
+    "transaction_hash": "0x7bc0929e524d80570afa7f197cc9d19fcebf0b21dce277406c6a92f5fd21e10e",
+    "gas_used": 519,
     "gas_unit_price": 100,
-    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
-    "sequence_number": 5,
+    "sender": "3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af",
+    "sequence_number": 7,
     "success": true,
-    "timestamp_us": 1665138249738149,
-    "version": 10554542,
+    "timestamp_us": 1665410951767585,
+    "version": 16535636,
     "vm_status": "Executed successfully"
   }
 }
@@ -205,14 +206,14 @@ ERC4626= { local = "../ERC4626/" }
 ```json
 {
   "Result": {
-    "transaction_hash": "0xb0418112eccdd18f6d2c7ea35e4df4c643b6f7e92b27b2966c686f3cf39c0bf9",
+    "transaction_hash": "0x899f677175c3ddeb12695c8e9a883179905f48008deb01a70528c4e3f12ca713",
     "gas_used": 518,
     "gas_unit_price": 100,
-    "sender": "932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49",
-    "sequence_number": 6,
+    "sender": "3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af",
+    "sequence_number": 8,
     "success": true,
-    "timestamp_us": 1665138301499872,
-    "version": 10555684,
+    "timestamp_us": 1665410991416610,
+    "version": 16536619,
     "vm_status": "Executed successfully"
   }
 }
