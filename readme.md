@@ -35,17 +35,16 @@ Here is a [solidity example implementation](https://github.com/transmissions11/s
 ```
 
 Each vault is uniquely defined from the couple ```<phantom CoinType, phantom YCoinType>```
-The **CoinType**: the type which represents the asset the user wants deposit in the vault.
+The **CoinType**: represents the asset the user wants deposit in the vault.
 The **YCoinType**: represents the share coin that allows to withdraw/redeem the asset.
 
 The contract allow to handle different vaults with a single account.
 
-## Methods
+## Methods list
 
 ### Initialize new vault
-```public entry fun initialize_new_vault<CoinType, YCoinType>(contract_owner:&signer, y_coin_name:vector<u8>, y_coin_symbol:vector<u8>)```
-
-This methods allow to init a new vault and initialize the contract's resources.
+```public entry fun initialize_new_vault<CoinType, YCoinType>(contract_owner:&signer, y_coin_name:vector<u8>, y_coin_symbol:vector<u8>, fees:u64)```
+This method initializes a new vault.
 
 ### Deposit
 ```public entry fun deposit<CoinType, YCoinType>(user: &signer, asset_amount:u64) acquires VaultInfo, VaultSharesSupply, VaultEvents```
@@ -53,26 +52,25 @@ The method allows the user to deposit asset and receive back shares 1:1 of the a
 
 ### Withdraw
 ```public entry fun withdraw<CoinType, YCoinType>(user: &signer, assets_amount: u64) acquires VaultInfo, VaultSharesSupply, VaultEvents```
-This function accept as input the asset amount the user wants to withdraw. If the user has sufficient shares to withdraw the asset amount the method will succeed.
+This function accepts as input the asset amount the user wants to withdraw. If the user has sufficient shares to withdraw the asset amount the method will succeed.
 
 ### Redeem
 ```public entry fun redeem<CoinType, YCoinType>(user: &signer, shares_amount: u64) acquires VaultInfo, VaultEvents, VaultSharesSupply```
-This function accept as input a share amount value. The user will receive asset coin proportional to his share partecipation.
+This function accepts as input a share amount value. The user will receive back asset coins proportional to his share partecipation.
 
 ### Transfer
 ```public entry fun transfer<CoinType, YCoinType>(user: &signer, asset_amount:u64) acquires VaultEvents, VaultInfo```
-This method allow to transfer on the vault asset without receive shares back.
+This method allows to deposit assets in the vault but without receive shares back.
 
-## OnChain Tutorial
+# How to use the contract
+The logic of the smart contract is contained in **ERC4626.move**. ERC4626 exports generic methods to handle vaults.
+The concrete instance that allows interaction with the contract is achieved through **AptosVault.move**. 
+You should customize AptosVault.move to handle different asset/share coins.
 
-The logic of the smart contract is contained in **ERC4626.move**. ERC4626 espone dei metodi generici per la creazione di vaults.
-The concrete instance that allows interaction with the contract is achieved through **AptosVault.move**.
-
-#### Publishing ERC4626 contract
+### 1. Publishing ERC4626 contract
 ```aptos move publish --package-dir erc4626/ERC4626 --named-addresses ERC4626=default ```
 
 ```json
-
 {
   "Result": {
     "transaction_hash": "0x28ded100a300f4798ac34bcd88065148db240fe2fcdad6fa5303c354fb4754e6",
@@ -88,10 +86,10 @@ The concrete instance that allows interaction with the contract is achieved thro
 }
 ```
 
-#### Publishing AptosVault
-The aptos vault is the concrete instance of the ERC4626
+### 2. Publishing AptosVault
+The AptosVault is the concrete instance of the package ERC4626. In this case is implemented with AptosCoin (asset) and YAptosCoin (share).
 
-edit the AptosVaul toml file with the address of the ERC4626 just published
+Before to deploy AptosVault you have to edit the AptosVault toml file with the address of the ERC4626 published before
 
 ```toml
 [package]
@@ -106,7 +104,7 @@ ERC4626="0x3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af"
 ERC4626= { local = "../ERC4626/" }
 ```
 
-```aptos move publish --package-dir AptosVault --named-addresses ERC4626=default --named-addresses AptosVault=default```
+```aptos move publish --package-dir AptosVault --named-addresses AptosVault=default```
 
 ```json
 {
@@ -124,7 +122,7 @@ ERC4626= { local = "../ERC4626/" }
 }
 ```
 
-### Create vault instance
+### 3. Create vault instance
 ```aptos move run --function-id 3376887002bf3f4a33ff084ec4266f3044a9ac40327212867958ed4d953de3af::ConcreteVault::initialiaze_vault --args string:aptosCoin string:apt u64:5000```
 
 ```json
@@ -143,7 +141,7 @@ ERC4626= { local = "../ERC4626/" }
 }
 ```
 
-### Deposit example
+### 4. Deposit example
 ```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::deposit --args u64:1000000```
 
 ```json
@@ -162,7 +160,7 @@ ERC4626= { local = "../ERC4626/" }
 }
 ```
 
-### Trasfer example
+### 5. Trasfer example
 ```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::transfer --args u64:1111111```
 
 ```json
@@ -181,7 +179,7 @@ ERC4626= { local = "../ERC4626/" }
 }
 ```
 
-### Withdraw example
+### 6. Withdraw example
 ```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::withdraw --args u64:20000```
 
 ```json
@@ -200,7 +198,7 @@ ERC4626= { local = "../ERC4626/" }
 }
 ```
 
-### Redeem example
+### 7. Redeem example
 ```aptos move run --function-id 932d148b45216030dd27a72b1b053db27987c5b93635c40c0852e5be508b8a49::ConcreteVault::redeem --args u64:33300```
 
 ```json
